@@ -1,0 +1,9 @@
+# requirements.txt
+fastapi
+uvicorn
+requests
+python-dotenv
+google-generativeai
+pymongo
+pydantic
+python-multipart
