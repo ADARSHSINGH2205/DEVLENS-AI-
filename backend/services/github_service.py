@@ -2,12 +2,13 @@ from collections import Counter
 import os
 import requests
 
+import os
+
 HEADERS = {
     "Accept": "application/vnd.github+json",
     "User-Agent": "AI-DevConnect-profile-analyzer",
-    "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN', '')}"
+    "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}"
 }
-
 def _get_json(url, params=None):
     response = requests.get(
         url,
