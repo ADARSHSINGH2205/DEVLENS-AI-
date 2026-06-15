@@ -64,7 +64,7 @@ function Dashboard() {
     } catch (error) {
       console.error(error);
       setResult(null);
-      setError("Unable to reach the analysis API. Start the backend on port 8000 and try again.");
+      setError("Analysis failed. The backend returned an error or the request was rejected. Please try again with valid GitHub/LeetCode usernames.");
     } finally {
       setLoading(false);
     }
