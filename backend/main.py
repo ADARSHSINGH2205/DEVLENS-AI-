@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from config import CORS_ORIGINS
+from config import CORS_ORIGINS, CORS_ORIGIN_REGEX
 from routes.github import router as github_router
 from routes.leetcode import router as leetcode_router
 from routes.analyze import router as analyze_router
@@ -14,6 +14,7 @@ app = FastAPI(title="DevLens AI API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
+    allow_origin_regex=CORS_ORIGIN_REGEX,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

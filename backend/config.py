@@ -18,6 +18,7 @@ CORS_ORIGINS = [
     for origin in os.getenv("CORS_ORIGINS", ",".join(DEFAULT_CORS_ORIGINS)).split(",")
     if origin.strip()
 ]
+CORS_ORIGIN_REGEX = os.getenv("CORS_ORIGIN_REGEX", r"https://.*\.vercel\.app")
 
 if not GEMINI_API_KEY:
     print("WARNING: GEMINI_API_KEY not found")
