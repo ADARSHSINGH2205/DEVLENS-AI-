@@ -6,7 +6,7 @@ function LinkedInCard({ data }) {
 
   const availableFields = data.availableFields || [];
   const publicFieldCount = availableFields.length;
-  const visibilityScore = Math.min(Math.round((publicFieldCount / 5) * 100), 100);
+  const visibilityScore = Math.min(Math.round((publicFieldCount / 10) * 100), 100);
   const statusLabel =
     Number(data.statusCode) >= 200 && Number(data.statusCode) < 300
       ? "Profile check passed"
@@ -41,19 +41,21 @@ function LinkedInCard({ data }) {
 
       <div className="profileMeta">
         {data.publicUrl && <span>{data.publicUrl}</span>}
-        {data.description && <span>{data.description}</span>}
+        {data.siteName && <span>{data.siteName}</span>}
+        {data.title && <span>{data.title}</span>}
+        {data.summary && <span>{data.summary}</span>}
       </div>
 
-      {!!availableFields.length && (
-        <div className="miniBlock">
-          <h3>What LinkedIn exposed</h3>
-          <div className="skillTags compactTags">
-            {availableFields.map((field) => (
-              <span key={field}>{field}</span>
-            ))}
-          </div>
+      <div className="miniBlock">
+        <h3>Public profile fields</h3>
+        <div className="skillTags compactTags">
+          {availableFields.length ? (
+            availableFields.map((field) => <span key={field}>{field}</span>)
+          ) : (
+            <span>No public fields captured</span>
+          )}
         </div>
-      )}
+      </div>
 
       {data.visibilityNote && (
         <p className="visibilityNote">{data.visibilityNote}</p>

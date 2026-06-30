@@ -64,6 +64,14 @@ def _split_title(title):
     return title, None
 
 
+def _first_value(*values):
+    for value in values:
+        cleaned = _clean_text(value)
+        if cleaned:
+            return cleaned
+    return None
+
+
 def _extract_json_ld(parser):
     extracted = {}
 
@@ -79,13 +87,22 @@ def _extract_json_ld(parser):
             if not isinstance(item, dict):
                 continue
 
+            address = item.get("address")
+            if isinstance(address, dict):
+                location = address.get("addressLocality") or address.get("addressRegion") or address.get("addressCountry")
+            else:
+                location = address
+
             extracted.update({
                 "name": item.get("name"),
-                "headline": item.get("jobTitle") or item.get("description"),
+                "headline": item.get("jobTitle") or item.get("headline") or item.get("description"),
                 "image": item.get("image"),
-                "location": item.get("address", {}).get("addressLocality")
-                if isinstance(item.get("address"), dict)
-                else item.get("address")
+                "location": location,
+                "description": item.get("description"),
+                "url": item.get("url"),
+                "company": item.get("worksFor", {}).get("name") if isinstance(item.get("worksFor"), dict) else item.get("worksFor"),
+                "school": item.get("alumniOf", {}).get("name") if isinstance(item.get("alumniOf"), dict) else item.get("alumniOf"),
+                "occupation": item.get("occupation")
             })
 
     return {
@@ -128,29 +145,53 @@ def get_linkedin_data(profile_url):
     meta = parser.meta
     json_ld = _extract_json_ld(parser)
     name, title_headline = _split_title(
-        meta.get("og:title") or meta.get("title")
+        _first_value(meta.get("og:title"), meta.get("twitter:title"), meta.get("title"))
     )
-    description = _clean_text(
-        meta.get("og:description") or meta.get("description")
+    description = _first_value(
+        meta.get("og:description"),
+        meta.get("twitter:description"),
+        meta.get("description"),
+        json_ld.get("description")
     )
+    canonical_url = _first_value(
+        meta.get("og:url"),
+        meta.get("twitter:url"),
+        json_ld.get("url"),
+        profile_url
+    )
+    image = _first_value(
+        json_ld.get("image"),
+        meta.get("og:image:secure_url"),
+        meta.get("og:image"),
+        meta.get("twitter:image")
+    )
+    headline = _first_value(
+        json_ld.get("headline"),
+        title_headline,
+        description
+    )
+    occupation = _first_value(
+        json_ld.get("occupation"),
+        headline
+    )
+    company = _first_value(json_ld.get("company"))
+    school = _first_value(json_ld.get("school"))
+    location = _first_value(json_ld.get("location"))
+    site_name = _first_value(meta.get("og:site_name"), meta.get("application-name"))
 
-    headline = (
-        json_ld.get("headline")
-        or title_headline
-        or description
-    )
-    image = (
-        json_ld.get("image")
-        or meta.get("og:image")
-        or meta.get("twitter:image")
-    )
     available_field_map = {
-        "name": json_ld.get("name") or name,
+        "name": name or json_ld.get("name"),
         "headline": headline,
         "description": description,
         "profilePicture": image,
-        "location": json_ld.get("location"),
-        "publicUrl": meta.get("og:url") or profile_url
+        "location": location,
+        "publicUrl": canonical_url,
+        "siteName": site_name,
+        "occupation": occupation,
+        "company": company,
+        "school": school,
+        "title": _first_value(meta.get("og:title"), meta.get("twitter:title"), meta.get("title")),
+        "summary": _first_value(meta.get("og:description"), meta.get("twitter:description"), meta.get("description"))
     }
 
     return {
@@ -160,8 +201,14 @@ def get_linkedin_data(profile_url):
         "headline": headline,
         "description": description,
         "profilePicture": image,
-        "location": available_field_map["location"],
-        "publicUrl": available_field_map["publicUrl"],
+        "location": location,
+        "publicUrl": canonical_url,
+        "siteName": site_name,
+        "occupation": occupation,
+        "company": company,
+        "school": school,
+        "title": available_field_map["title"],
+        "summary": available_field_map["summary"],
         "availableFields": [
             key
             for key, value in available_field_map.items()
