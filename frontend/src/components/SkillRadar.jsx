@@ -12,16 +12,16 @@ const clamp = (value, max) => Math.max(0, Math.min(Math.round((value / max) * 10
 
 function SkillRadar({ github = {}, leetcode = {}, linkedin = null, score = 0 }) {
   const languageCount = Object.keys(github.languages || {}).length;
-  const linkedinSkillCount = linkedin?.skills?.length || 0;
+  const linkedinSignal = linkedin ? Math.min(Math.round(((linkedin.availableFields?.length || 0) / 5) * 100), 100) : null;
   const data = [
-    { skill: "Portfolio depth", value: clamp(github.repos || 0, 60) },
-    { skill: "Public credibility", value: clamp((github.followers || 0) + (github.stars || 0), 250) },
-    { skill: "DSA consistency", value: clamp(leetcode.totalSolved || 0, 600) },
-    { skill: "Advanced DSA", value: clamp(leetcode.hardSolved || 0, 120) },
+    { skill: "Portfolio depth", value: clamp(github.repos || 0, 30) },
+    { skill: "Public trust", value: clamp((github.followers || 0) + (github.stars || 0), 250) },
+    { skill: "DSA consistency", value: clamp(leetcode.totalSolved || 0, 400) },
+    { skill: "Advanced DSA", value: clamp(leetcode.hardSolved || 0, 60) },
     { skill: "Tech breadth", value: clamp(languageCount, 8) },
     {
-      skill: linkedin ? "Career branding" : "Overall readiness",
-      value: linkedin ? clamp(linkedinSkillCount, 10) : Math.round(score || 0),
+      skill: linkedin ? "LinkedIn visibility" : "Overall readiness",
+      value: linkedinSignal !== null ? linkedinSignal : Math.round(score || 0),
     },
   ];
 
@@ -38,7 +38,7 @@ function SkillRadar({ github = {}, leetcode = {}, linkedin = null, score = 0 }) 
           <span className="eyebrow">Capability map</span>
           <h2>Developer strength radar</h2>
         </div>
-        <p>Normalized view of portfolio depth, DSA strength, public credibility, and career branding.</p>
+        <p>A normalized view of the main signals: depth, trust, problem-solving, breadth, and LinkedIn visibility.</p>
       </div>
 
       <ResponsiveContainer width="100%" height={360}>

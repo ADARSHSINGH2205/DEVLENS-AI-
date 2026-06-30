@@ -2,7 +2,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Line,
+  Legend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -10,16 +10,17 @@ import {
 } from "recharts";
 import { motion } from "framer-motion";
 
+const clampPercent = (value, max) => Math.max(0, Math.min(Math.round((value / max) * 100), 100));
+
 function ActivityChart({ github = {}, leetcode = {}, linkedin = null }) {
-  const linkedinSkillCount = linkedin?.skills?.length || 0;
+  const linkedinSignal = linkedin ? Math.min(Math.round(((linkedin.availableFields?.length || 0) / 5) * 100), 100) : null;
   const data = [
-    { name: "Project depth", value: github.repos || 0, benchmark: 25 },
-    { name: "Open-source trust", value: github.stars || 0, benchmark: 40 },
-    { name: "Developer reach", value: github.followers || 0, benchmark: 50 },
-    { name: "Core DSA base", value: leetcode.easySolved || 0, benchmark: 150 },
-    { name: "Interview readiness", value: leetcode.mediumSolved || 0, benchmark: 180 },
-    { name: "Advanced problem depth", value: leetcode.hardSolved || 0, benchmark: 55 },
-    ...(linkedin ? [{ name: "Career keywords", value: linkedinSkillCount, benchmark: 8 }] : []),
+    { name: "GitHub depth", current: clampPercent(github.repos || 0, 30), target: 70 },
+    { name: "Open-source trust", current: clampPercent(github.stars || 0, 120), target: 70 },
+    { name: "DSA basics", current: clampPercent(leetcode.easySolved || 0, 200), target: 70 },
+    { name: "Interview depth", current: clampPercent(leetcode.mediumSolved || 0, 180), target: 70 },
+    { name: "Advanced DSA", current: clampPercent(leetcode.hardSolved || 0, 60), target: 70 },
+    ...(linkedinSignal !== null ? [{ name: "LinkedIn visibility", current: linkedinSignal, target: 70 }] : []),
   ];
 
   return (
@@ -33,9 +34,9 @@ function ActivityChart({ github = {}, leetcode = {}, linkedin = null }) {
       <div className="sectionHeader">
         <div>
           <span className="eyebrow">Signal comparison</span>
-          <h2>Readiness benchmark</h2>
+          <h2>Easy benchmark view</h2>
         </div>
-        <p>Important career signals compared with practical early-career targets.</p>
+        <p>Your current signals are shown next to a simple 70% target so the chart is easier to read at a glance.</p>
       </div>
 
       <ResponsiveContainer width="100%" height={320}>
@@ -47,14 +48,26 @@ function ActivityChart({ github = {}, leetcode = {}, linkedin = null }) {
             axisLine={false}
             tickLine={false}
             interval={0}
-            angle={-18}
+            angle={-16}
             textAnchor="end"
-            height={72}
+            height={74}
           />
-          <YAxis tick={{ fill: "#9fb0c2", fontSize: 12 }} axisLine={false} tickLine={false} />
-          <Tooltip contentStyle={{ background: "#101827", border: "1px solid rgba(255,255,255,0.12)" }} />
-          <Bar dataKey="value" fill="#19d3c5" radius={[8, 8, 0, 0]} />
-          <Line type="monotone" dataKey="benchmark" stroke="#f59e0b" strokeWidth={3} dot={false} />
+          <YAxis
+            tick={{ fill: "#9fb0c2", fontSize: 12 }}
+            axisLine={false}
+            tickLine={false}
+            domain={[0, 100]}
+          />
+          <Tooltip
+            formatter={(value, name) => [
+              `${value}%`,
+              name === "current" ? "Your profile" : "Target",
+            ]}
+            contentStyle={{ background: "#101827", border: "1px solid rgba(255,255,255,0.12)" }}
+          />
+          <Legend wrapperStyle={{ color: "#c8d3e1" }} />
+          <Bar dataKey="current" name="Your profile" fill="#19d3c5" radius={[8, 8, 0, 0]} />
+          <Bar dataKey="target" name="Target" fill="#f59e0b" radius={[8, 8, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </motion.section>

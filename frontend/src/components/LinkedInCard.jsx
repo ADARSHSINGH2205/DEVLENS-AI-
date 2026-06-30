@@ -4,8 +4,13 @@ import StatCard from "./StatCard";
 function LinkedInCard({ data }) {
   if (!data) return null;
 
-  const skillCount = data.skills?.length || 0;
   const availableFields = data.availableFields || [];
+  const publicFieldCount = availableFields.length;
+  const visibilityScore = Math.min(Math.round((publicFieldCount / 5) * 100), 100);
+  const statusLabel =
+    Number(data.statusCode) >= 200 && Number(data.statusCode) < 300
+      ? "Profile check passed"
+      : "Profile check limited";
 
   return (
     <motion.section
@@ -28,10 +33,10 @@ function LinkedInCard({ data }) {
       </div>
 
       <div className="statGrid">
-        <StatCard label="Public fields" value={availableFields.length || 1} detail="visible profile details" tone="blue" />
-        <StatCard label="Listed skills" value={skillCount || "N/A"} detail="only if public/API provided" tone="violet" />
+        <StatCard label="Checkup" value={statusLabel} detail="lookup response" tone="cyan" />
+        <StatCard label="Public signals" value={publicFieldCount || 0} detail="visible fields found" tone="blue" />
+        <StatCard label="Visibility" value={`${visibilityScore}%`} detail="public profile coverage" tone="violet" />
         <StatCard label="Location" value={data.location || "N/A"} detail="public location" tone="green" />
-        <StatCard label="Profile status" value={data.statusCode || "N/A"} detail="fetch response" tone="cyan" />
       </div>
 
       <div className="profileMeta">
@@ -39,11 +44,14 @@ function LinkedInCard({ data }) {
         {data.description && <span>{data.description}</span>}
       </div>
 
-      {!!skillCount && (
-        <div className="skillTags">
-          {data.skills.slice(0, 8).map((skill) => (
-            <span key={skill}>{skill}</span>
-          ))}
+      {!!availableFields.length && (
+        <div className="miniBlock">
+          <h3>What LinkedIn exposed</h3>
+          <div className="skillTags compactTags">
+            {availableFields.map((field) => (
+              <span key={field}>{field}</span>
+            ))}
+          </div>
         </div>
       )}
 
