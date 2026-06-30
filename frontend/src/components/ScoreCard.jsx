@@ -22,8 +22,8 @@ function ScoreCard({ github, leetcode, score = 0 }) {
         <span className="eyebrow">Developer intelligence</span>
         <h2>Profile readiness score</h2>
         <p>
-          A blended indicator of portfolio strength, open-source credibility,
-          and coding interview readiness.
+          A balanced indicator of GitHub depth, LeetCode strength, and overall
+          interview readiness.
         </p>
 
         <div className="scoreMeta">
